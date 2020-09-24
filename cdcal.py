@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from datetime import date, datetime
 import time,cdsave
+import tkcalendar as tkc
 
 class App:
 
@@ -10,7 +11,7 @@ class App:
         #today stores the date value of the current day
         #stores the number of times calculate button is clicked
         self.today, self.no_of_times_clicked = date.today(), 0
-
+        print(self.today)
         #====================Menu bar ==============================#
         menubar = tk.Menu(root)
 
@@ -68,7 +69,8 @@ class App:
         self.name_box.grid(row = 1, column = 0, padx = 3, pady = 3)
 
         self.date_input = tk.StringVar()
-        self.date_box = tk.Entry(top1, textvariable = self.date_input, bd = 3, bg = "powderblue")
+        self.date_box = tkc.DateEntry(top1, textvariable = self.date_input, bd = 3, bg = "powderblue",
+                        date_pattern = "d/m/y", firstweekday = "sunday")
         self.date_box.grid(row = 1, column = 1, padx = 3, pady = 3)
 
         cal_btn = tk.Button(right1, text = "Calculate", bd = 5 , relief = "raise", width = 13, cursor = "dotbox", \
@@ -79,27 +81,25 @@ class App:
                          command = self.reset, fg = "red", bg = "lightblue")
         reset_btn.grid(row = 0, column = 1)
 
+        differenceall = tk.Label(middle, font = ("Arial",11,"normal"),
+                      text = "Difference(years, months, weeks, days)",\
+                      bg = "White")
+        differenceall.grid(row = 0, column = 0)
+
         self.message1 = tk.StringVar()
         self.message_box1 = tk.Entry(middle, font = 28, bd = 5, textvariable = self.message1,\
-                                fg = "Black",bg = "powderblue")
-        self.message_box1.grid(row = 1, column = 0, pady = 5)
+                                fg = "Black",bg = "powderblue", width = 28)
+        self.message_box1.grid(row = 1, column = 0, pady = 5, sticky = "w")
+
+        differenced = tk.Label(middle, font = ("Arial",11,"normal"),
+                      text = "Difference(days)", 
+                      bg = "White")
+        differenced.grid(row = 2, column = 0, sticky = "w")
 
         self.message2 = tk.StringVar()
         self.message_box2 = tk.Entry(middle, font = 28, bd = 5, textvariable = self.message2, \
-                                fg = "Black",bg = "powderblue")
-        self.message_box2.grid(row = 2, column = 0, pady = 5)
-
-        difference = tk.Label(middle, font = ("Arial",11,"bold"), text = "Difference",\
-                              bg = "White")
-        difference.grid(row = 0, column = 1)
-
-        days = tk.Label(middle, font = ("Arial",11,"bold"), text = "In days",\
-                        bg = "White")
-        days.grid(row = 1, column = 1)
-
-        weeks = tk.Label(middle, font = ("Arial",11,"bold"), text = "In weeks",\
-                        bg = "White")
-        weeks.grid(row = 2, column = 1)
+                                fg = "Black",bg = "powderblue", width = 28)
+        self.message_box2.grid(row = 3, column = 0, pady = 5, sticky = "w")
 
         self.status = tk.StringVar()
         self.status_text = tk.Label(root, font = ("Arial",10), textvariable = self.status,\
@@ -138,6 +138,7 @@ class App:
 
         self.name_input.set("")
         self.date_input.set("")
+        self.date_box.set_date(self.today)
         self.message1.set("")
         self.message2.set("")
         self.status.set("")
@@ -146,100 +147,59 @@ class App:
         self.status.set("Data cleared")
 
         
-    def days_between_dates(self, date2, date1):
+    def diff_between_dates(self, date2, date1):
         """ calculate the days between dates """
-        
-        #has to be converted to string object so as to use method split
-        number_of_days = str(date2 - date1).split(" ")
-        return number_of_days
+        days_bet_days = str(date2 - date1).split()[0]
+        days_bet_day1 = date2 - date1
+        print(days_bet_day1)
+        diff_days = abs(date2.day - date1.day)
+        diff_of_months = abs(date2.month - date1.month)
+        diff_of_years = abs(date2.year - date1.year)
+        return diff_of_years, diff_of_months, diff_days, days_bet_days
 
-    def validate_date(self, d1):
-        """ to format date typed correctly """
-        #to do
-        #allow the user to use - or , or !
-        if d1.find("/") >= 0:
-            if d1.count("/") == 2:
-                d1_list = d1.split("/") 
-                if len(d1_list[2]) == 4: # checks whether the year is written in 20**
-                    #converts the string entered to date object
-                    date_format = datetime.strptime(d1, "%d/%m/%Y").date() 
-                    return date_format
-                elif len(d1_list[2]) == 2: # checks whether the year is written in **
-                    #converts the string entered to date object
-                    date_format = datetime.strptime(d1, "%d/%m/%y").date() 
-                    return date_format
-                elif len(d1_list[2]) == 0 or len(d1_list[2]) == 1:
-                    pass
-                    # message on status bar
-                    # status.set("You did not input the year for the date")
-            elif d1.count("/") == 1 or d1.count("/") == 0:
-                pass
-                # status_text.configure(fg = "Red")
-                # status.set("Date typed isn't complete!")
-            else:
-                pass
-                # status_text.configure(fg = "Red")
-                # status.set("Type a Valid date!")
-        
-        elif d1.find("/") <  0:
-            pass
-            # status_text.configure(fg = "Red")
-            # status.set("Ensure '/' is included")
+    def check_plurality(self, message, quantity, pluword = "days", singword = "day"):
+        """ return a new string with correct syntax in terms of plurality """
+        if int(quantity) <= 1:
+            c_message = message.replace(pluword, singword)
+            return c_message
         else:
-            pass
-            # status_text.configure(fg = "Red")
-            # status.set("Type a Valid date!")
-
-            
+            return message
+        
     def display_days(self):
         """ displays the result to their respective widget """
         
         self.no_of_times_clicked += 1
-        try:
-            format_date = self.validate_date(self.date_box.get())
-            number_of_days = self.days_between_dates(format_date,self.today)
-            
-            message1 = f"It is {number_of_days[0]} days until {self.name_box.get()}."
-            
-            #to display difference in weeks too
-            number_of_weeks = int(number_of_days[0]) // 7
-            weeks_days_left = int(number_of_days[0]) % 7
-            
-            #print(number_of_weeks)
-            print(weeks_days_left)
-            
-            message2 = \
-            f"It is {number_of_weeks} weeks, {weeks_days_left} days until  {self.name_box.get()}."
-            
-            #to delete the previous messages if the calculate button has been 
-            #pressed once
-            if self.no_of_times_clicked > 1:
-                self.message_box1.delete(0,len(message1) + 1)
-                self.message_box2.delete(0,len(message2) + 1)
-            else:
-                pass
-            self.message_box1.insert(0,message1)
-            self.message_box2.insert(0,message2)
-            
-            #to store the date that will be typed in stickynote since format_date 
-            #will be deleted later
-            fformat_date = format_date
-            #to solve this issue
-            #the date typed isn't really deleted cause another variable is used to
-            #store the date
-            del format_date
-            
-            self.status_text.configure(fg = "Black")
-            self.status.set("Done!")
-            return fformat_date
-        
-        except (NameError, IndexError, TypeError, ValueError):
-            self.status_text.configure(fg = "Red")
-            self.status.set("Type a valid date!!!")
+        print(self.date_box.get_date())
+        if self.date_box.get_date() != self.today:
+            diff = self.diff_between_dates(self.date_box.get_date(), self.today)
+            print(diff)
+            message1 = f"It is {diff[0]} years {diff[1]} months {diff[2]} days until {self.name_box.get()}."
+            message1 = self.check_plurality(pluword = "years", quantity = diff[0], message = message1, singword = "year") 
+            message1 = self.check_plurality(pluword = "months", quantity = diff[1], message = message1, singword = "month")
+            message1 = self.check_plurality(pluword = "days", quantity = diff[2], message = message1, singword = "day")
+
+            message2 = f"It is {diff[3]} days until {self.name_box.get()}."
+            message2 = self.check_plurality(message2, diff[3])
+        else:
+            message1 = "Same dates."
+            message2 = message1
+        #do nothing
+        #to delete the previous messages if the calculate button has been 
+        #pressed once
+        if self.no_of_times_clicked > 1:
+            self.message_box1.delete(0,"end")
+            self.message_box2.delete(0,"end")
+        else:
+            pass
+        self.message_box1.insert(0,message1)
+        self.message_box2.insert(0,message2)
+        self.status_text.configure(fg = "Black")
+        self.status.set("Done!")
+        #to store the date that will be typed in stickynote 
+        return self.date_box.get_date()
 
     def save(self):
         """ enables data to be typed on stickynote """
-        
         date = self.display_days()
         cdsave.openstickynote()
         time.sleep(2)
@@ -250,7 +210,7 @@ class App:
 if __name__ == "__main__": 
     root = tk.Tk()
     root.title("Countdown Calendar")
-    root.geometry("310x341+0+0")
+    root.geometry("310x365+0+0")
     root.resizable(0,0)
     root.iconbitmap(r".\cc.ico") #r indicate raw string [it ignore \ as esc char]
     root.configure(bg = "Red")
