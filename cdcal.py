@@ -1,7 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox
-from datetime import date, datetime
-import time,cdsave
+from datetime import date
+from dateutil import relativedelta
+import cdsave
 import tkcalendar as tkc
 
 class App:
@@ -142,23 +143,27 @@ class App:
         self.message1.set("")
         self.message2.set("")
         self.status.set("")
-        time.sleep(0.1)
         self.status_text.configure(fg = "Black")
         self.status.set("Data cleared")
 
         
-    def diff_between_dates(self, date2, date1):
+    def diff_between_dates(self, date_2, date_1):
         """ calculate the days between dates """
-        days_bet_days = str(date2 - date1).split()[0]
-        days_bet_day1 = date2 - date1
-        print(days_bet_day1)
-        diff_days = abs(date2.day - date1.day)
-        diff_of_months = abs(date2.month - date1.month)
-        diff_of_years = abs(date2.year - date1.year)
-        return diff_of_years, diff_of_months, diff_days, days_bet_days
+        diff_bet_days = (date_2 - date_1).days
+        difference = relativedelta.relativedelta(date_2, date_1)
+        diff_years = difference.years
+        diff_months = difference.months
+        diff_weeks = difference.weeks
+        if difference.days % 7 == 0:
+            diff_days = 0
+        elif difference.days < 7:
+            diff_days = difference.days
+        elif difference.days > 7:
+            diff_days = difference.days - (diff_weeks * 7)
+        return diff_years, diff_months, diff_weeks, diff_days, diff_bet_days
 
     def check_plurality(self, message, quantity, pluword = "days", singword = "day"):
-        """ return a new string with correct syntax in terms of plurality """
+        """ returns a new string with correct syntax in terms of plurality """
         if int(quantity) <= 1:
             c_message = message.replace(pluword, singword)
             return c_message
@@ -166,20 +171,20 @@ class App:
             return message
         
     def display_days(self):
-        """ displays the result to their respective widget """
-        
+        """ displays the result to their respective widget """      
         self.no_of_times_clicked += 1
         print(self.date_box.get_date())
         if self.date_box.get_date() != self.today:
             diff = self.diff_between_dates(self.date_box.get_date(), self.today)
             print(diff)
-            message1 = f"It is {diff[0]} years {diff[1]} months {diff[2]} days until {self.name_box.get()}."
+            message1 = f"It is {diff[0]} years, {diff[1]} months, {diff[2]} weeks, {diff[3]} days until {self.name_box.get()}."
             message1 = self.check_plurality(pluword = "years", quantity = diff[0], message = message1, singword = "year") 
             message1 = self.check_plurality(pluword = "months", quantity = diff[1], message = message1, singword = "month")
-            message1 = self.check_plurality(pluword = "days", quantity = diff[2], message = message1, singword = "day")
+            message1 = self.check_plurality(pluword = "weeks", quantity = diff[2], message = message1, singword = "week")
+            message1 = self.check_plurality(pluword = "days", quantity = diff[3], message = message1, singword = "day")
 
-            message2 = f"It is {diff[3]} days until {self.name_box.get()}."
-            message2 = self.check_plurality(message2, diff[3])
+            message2 = f"It is {diff[4]} days until {self.name_box.get()}."
+            message2 = self.check_plurality(message2, diff[4])
         else:
             message1 = "Same dates."
             message2 = message1
