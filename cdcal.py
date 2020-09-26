@@ -207,7 +207,6 @@ class App:
         """ enables data to be typed on stickynote """
         date = self.display_days()
         cdsave.openstickynote()
-        time.sleep(2)
         cdsave.writedata(date = date, description = self.name_box.get(), \
                         message = self.message_box1.get() + "\n" + self.message_box2.get())
 
