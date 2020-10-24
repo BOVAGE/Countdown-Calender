@@ -221,7 +221,7 @@ class App:
         self.status.set("Data cleared")
 
         
-    def diff_between_dates(self, date_2, date_1) -> tuple :
+    def diff_between_dates(self, date_2: date, date_1: date) -> tuple :
         """ calculate the days between dates """
         
         diff_bet_days = (date_2 - date_1).days
@@ -246,7 +246,7 @@ class App:
             years = int(years)
             months = int(months)
             days = int(days)
-            print(type(date))
+            #print(type(date))
             if operation.title() == "Add":
                 result = date + relativedelta(years = years, months = months, days = days)
                 return result
@@ -267,7 +267,6 @@ class App:
     def display_diff(self):
         """ displays the result to their respective widget """      
         self.no_of_times_clicked += 1
-        print(self.date_box1.get_date())
         if self.date_box1.get_date() != self.date_box2.get_date():
             diff = self.diff_between_dates(self.date_box2.get_date(), self.date_box1.get_date())
             print(diff)
@@ -302,7 +301,6 @@ class App:
         self.no_of_times_clicked2 += 1
         answer = self.addorsub(self.from_date.get_date(), self.year_box.get(), self.month_box.get(),
                                self.day_box.get(), self.operation.get())
-        print(type(answer))
         message = answer.strftime("%A,%B %d, %Y")
         if self.no_of_times_clicked2 > 1:
             self.date_box.delete(0,"end")
@@ -321,8 +319,8 @@ class App:
 if __name__ == "__main__": 
     root = tk.Tk()
     root.title("Countdown Calendar")
-    root.geometry("310x390+0+0")
-    root.resizable(1,1)
+    root.geometry("375x415+0+0")
+    root.resizable(0,0)
     root.iconbitmap(r".\cc.ico") #r indicate raw string [it ignore \ as esc char]
     root.configure(bg = "Red")
     cdcal = App(root)
